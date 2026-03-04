@@ -1,0 +1,84 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+model Customer {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  name          String
+  email         String
+  phone         String
+  token         String   @unique
+  tokenExpiry   DateTime
+  status        Status   @default(PENDING) // PENDING, REJECTED, APPROVED
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  // Communication tracking
+  emailSent     Boolean  @default(false)
+  whatsappSent  Boolean  @default(false)
+  
+  // Relations
+  statements    Statement[]
+  reminders     Reminder[]
+  
+  @@index([token])
+  @@index([status])
+  @@index([userId])
+}
+
+model Statement {
+  id            String   @id @default(cuid())
+  customerId    String
+  customer      Customer @relation(fields: [customerId], references: [id])
+  
+  fileName      String
+  fileSize      Int
+  cloudinaryUrl String?
+  publicId      String?
+  mimeType      String
+  
+  status        StatementStatus @default(PENDING) // PENDING, REJECTED, APPROVED
+  rejectionReason String?
+  
+  uploadedAt    DateTime @default(now())
+  reviewedAt    DateTime?
+  reviewedBy    String?
+  
+  @@index([customerId])
+  @@index([status])
+}
+
+model Reminder {
+  id            String   @id @default(cuid())
+  customerId    String
+  customer      Customer @relation(fields: [customerId], references: [id])
+  
+  type          String   // EMAIL, WHATSAPP
+  reason        String   // INITIAL, REJECTION, EXPIRY
+  sentAt        DateTime @default(now())
+  status        String   // SENT, FAILED
+  errorMessage  String?
+  
+  @@index([customerId])
+  @@index([sentAt])
+}
+
+enum Status {
+  PENDING
+  REJECTED
+  APPROVED
+  EXPIRED
+}
+
+enum StatementStatus {
+  PENDING
+  REJECTED
+  APPROVED
+}
