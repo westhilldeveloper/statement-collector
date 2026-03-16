@@ -1,14 +1,15 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-   images: {
-    domains: ['res.cloudinary.com'],
+    images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+      },
+    ],
   },
   // Increase API body size limit for file uploads
-  api: {
-    bodyParser: {
-      sizeLimit: '10mb',
-    },
-  },
+ 
   reactCompiler: true,
    env: {
     NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,

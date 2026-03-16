@@ -1,6 +1,6 @@
 // app/api/verify-token/route.js
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/config';
+import { prisma } from '../../../../lib/config';
 
 export async function GET(request) {
   try {

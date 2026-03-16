@@ -1,6 +1,6 @@
 // app/api/statements/upload/route.js
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/config';
+import { prisma } from '../../../../../lib/config';
 
 export async function POST(request) {
   try {

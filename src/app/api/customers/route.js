@@ -1,4 +1,5 @@
 // app/api/customers/route.js
+
 import { NextResponse } from 'next/server';
 import { prisma } from '../../../../lib/config';
 

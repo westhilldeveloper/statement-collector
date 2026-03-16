@@ -19,9 +19,8 @@ export default function HomePage() {
    const { on, isConnected } = useSocket();
   // Load stats on homepage
 
-  useState(() => {
-    // const baseUrl = window.location.origin;
-    fetch(`/api/stats`)
+  useEffect(() => {
+    fetch('/api/stats')
       .then(res => res.json())
       .then(data => setStats(data))
       .catch(err => console.error('Failed to load stats:', err));
