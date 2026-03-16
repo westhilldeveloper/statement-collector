@@ -19,27 +19,27 @@ export default function HomePage() {
    const { on, isConnected } = useSocket();
   // Load stats on homepage
 
+  // useEffect(() => {
+  //   fetch('/api/stats')
+  //     .then(res => res.json())
+  //     .then(data => setStats(data))
+  //     .catch(err => console.error('Failed to load stats:', err));
+  // }, []);
+
   useEffect(() => {
-    fetch('/api/stats')
-      .then(res => res.json())
-      .then(data => setStats(data))
-      .catch(err => console.error('Failed to load stats:', err));
-  }, []);
+  const fetchStats = async () => {
+    try {
+      const baseUrl = window.location.origin;
+      const res = await fetch(`${baseUrl}/api/stats`);
+      const data = await res.json();
+      setStats(data);
+    } catch (err) {
+      console.error('Failed to load stats:', err);
+    }
+  };
 
-//   useEffect(() => {
-//   const fetchStats = async () => {
-//     try {
-//       const baseUrl = window.location.origin;
-//       const res = await fetch(`${baseUrl}/api/stats`);
-//       const data = await res.json();
-//       setStats(data);
-//     } catch (err) {
-//       console.error('Failed to load stats:', err);
-//     }
-//   };
-
-//   fetchStats();
-// }, []);
+  fetchStats();
+}, []);
 
  // Listen for real-time updates via socket
   useEffect(() => {
