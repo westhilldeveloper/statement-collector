@@ -6,20 +6,16 @@ export async function POST(request) {
   try {
     const { statementId } = await request.json();
 
-    // Get statement
     const statement = await prisma.statement.findUnique({
       where: { id: statementId },
       include: { customer: true }
     });
 
     if (!statement) {
-      return NextResponse.json(
-        { error: 'Statement not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Statement not found' }, { status: 404 });
     }
 
-    // Update statement status
+    // Mark the statement as APPROVED
     await prisma.statement.update({
       where: { id: statementId },
       data: {
@@ -28,33 +24,27 @@ export async function POST(request) {
       },
     });
 
-    // Check if all statements for this customer are approved
-    const pendingStatements = await prisma.statement.count({
-      where: {
-        customerId: statement.customerId,
-        status: { in: ['PENDING', 'REJECTED'] }
-      }
+    // Get the latest statement for this customer
+    const latestStatement = await prisma.statement.findFirst({
+      where: { customerId: statement.customerId },
+      orderBy: { uploadedAt: 'desc' },
     });
 
-    // If no pending statements, update customer status
-    if (pendingStatements === 0) {
-      await prisma.customer.update({
-        where: { id: statement.customerId },
-        data: { status: 'APPROVED' }
-      });
-    }
+    // Set customer status based on the latest statement
+    const newCustomerStatus = latestStatement?.status === 'APPROVED' ? 'APPROVED' : 'PENDING';
+
+    await prisma.customer.update({
+      where: { id: statement.customerId },
+      data: { status: newCustomerStatus },
+    });
 
     return NextResponse.json({
       success: true,
-      message: 'Statement approved successfully'
+      message: 'Statement approved successfully',
     });
-
   } catch (error) {
     console.error('Approval failed:', error);
-    return NextResponse.json(
-      { error: 'Failed to approve statement' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to approve statement' }, { status: 500 });
   }
 }
 

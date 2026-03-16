@@ -1,8 +1,8 @@
 // app/api/reminders/send/route.js
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/config';
-import { sendWhatsAppMessage } from '@/lib/whatsapp';
-import { sendReminderEmail } from '@/lib/email';
+import { prisma } from '../../../../../lib/config';
+import { sendWhatsAppMessage } from '../../../../../lib/whatsapp';
+import { sendReminderEmail } from '../../../../../lib/email';
 
 export async function POST(request) {
   try {

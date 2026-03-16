@@ -1,5 +1,6 @@
-// app/layout.js
+import { Toaster } from 'react-hot-toast';
 import { SocketProvider } from './context/SocketContext';
+import NavBar from './components/NavBar';
 import './globals.css';
 
 export const metadata = {
@@ -9,38 +10,23 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body className="bg-gray-50">
-        {/* Navigation Bar */}
+    <html lang="en" className="h-full">
+      <body className="bg-gray-50 h-full">
         <SocketProvider>
-        <nav className="bg-white shadow-lg">
-          <div className="max-w-7xl mx-auto px-4">
-            <div className="flex justify-between items-center h-16">
-              <div className="flex items-center">
-                <span className="text-2xl font-bold text-blue-600">Finovest</span>
-                <span className="ml-2 text-gray-600">Careers</span>
-              </div>
-              <div className="flex items-center space-x-4">
-                <a href="/" className="text-gray-700 hover:text-blue-600 px-3 py-2">Home</a>
-                <a href="/dashboard" className="text-gray-700 hover:text-blue-600 px-3 py-2">Dashboard</a>
-              </div>
+          <div className="flex flex-col min-h-full">
+          <NavBar />
+          <main className="flex-1">
+            {children}
+            <Toaster position="top-right" />
+          </main>
+          <footer className="bg-white border-t ">
+            <div className="max-w-7xl mx-auto px-4 py-6">
+              <p className="text-center text-gray-500 text-sm">
+                © 2024 Finovest Careers. All rights reserved.
+              </p>
             </div>
+          </footer>
           </div>
-        </nav>
-
-        {/* Main Content */}
-        <main className="min-h-screen">
-          {children}
-        </main>
-
-        {/* Footer */}
-        <footer className="bg-white border-t mt-12">
-          <div className="max-w-7xl mx-auto px-4 py-6">
-            <p className="text-center text-gray-500 text-sm">
-              © 2024 Finovest Careers. All rights reserved.
-            </p>
-          </div>
-        </footer>
         </SocketProvider>
       </body>
     </html>

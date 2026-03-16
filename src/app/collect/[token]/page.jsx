@@ -1,7 +1,7 @@
 // app/collect/[token]/page.js
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useSocket } from '../../context/SocketContext'; 
@@ -71,7 +71,27 @@ export default function StatementCollectionForm({ params }) {
   const [loadingStatements, setLoadingStatements] = useState(false);
   const [selectedStatement, setSelectedStatement] = useState(null);
   const [showStatementModal, setShowStatementModal] = useState(false);
+  const [filePassword, setFilePassword] = useState('');
   const router = useRouter();
+
+
+
+  const fetchCustomerStatements = useCallback(async () => {
+    setLoadingStatements(true);
+    try {
+      const res = await fetch(`/api/statements/by-token/${token}`);
+      const data = await res.json();
+      
+      if (data.success) {
+        setPreviousStatements(data.data.statements || []);
+        console.log("statement data===>", data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching statements:', error);
+    } finally {
+      setLoadingStatements(false);
+    }
+  }, [token]);
 
 
   useEffect(() => {
@@ -95,7 +115,7 @@ export default function StatementCollectionForm({ params }) {
       unsubscribeStatusChange?.();
     
     };
-  }, [on, isConnected]);
+  }, [on, isConnected, fetchCustomerStatements]);
 
   // Fetch customer details using the token
   useEffect(() => {
@@ -131,22 +151,7 @@ export default function StatementCollectionForm({ params }) {
     }
   }, [token]);
 
-  const fetchCustomerStatements = async () => {
-    setLoadingStatements(true);
-    try {
-      const res = await fetch(`/api/statements/by-token/${token}`);
-      const data = await res.json();
-      
-      if (data.success) {
-        setPreviousStatements(data.data.statements || []);
-        console.log("statement data===>", data.data);
-      }
-    } catch (error) {
-      console.error('Error fetching statements:', error);
-    } finally {
-      setLoadingStatements(false);
-    }
-  };
+  
 
   // Function to view a specific statement
   const viewStatement = (statement) => {
@@ -155,42 +160,52 @@ export default function StatementCollectionForm({ params }) {
   };
 
   const validateFiles = (fileList) => {
-    const errors = [];
-    const validFiles = [];
-    
-    // Check maximum files (limit to 10)
-    if (fileList.length > 10) {
-      errors.push(`Maximum 10 files allowed (you selected ${fileList.length})`);
-      return { errors, validFiles: [] };
+  const errors = [];
+  const validFiles = [];
+  
+  // Check maximum files (limit to 10)
+  if (fileList.length > 10) {
+    errors.push(`Maximum 10 files allowed (you selected ${fileList.length})`);
+    return { errors, validFiles: [] };
+  }
+
+  // Check total size (max 50MB total)
+  const totalSize = Array.from(fileList).reduce((sum, file) => sum + file.size, 0);
+  if (totalSize > 50 * 1024 * 1024) {
+    errors.push('Total file size exceeds 50MB limit');
+  }
+
+  // Allowed MIME types
+  const allowedTypes = [
+    'application/pdf',
+    'image/jpeg',
+    'image/png',
+    'image/gif',
+    'image/bmp',
+    'image/tiff'
+  ];
+
+  // Validate each file
+  Array.from(fileList).forEach((file, index) => {
+    // Check file type
+    if (!allowedTypes.includes(file.type)) {
+      errors.push(`File ${index + 1} (${file.name}): Only PDF and image files allowed (JPEG, PNG, GIF, BMP, TIFF)`);
     }
-
-    // Check total size (max 50MB total)
-    const totalSize = Array.from(fileList).reduce((sum, file) => sum + file.size, 0);
-    if (totalSize > 50 * 1024 * 1024) {
-      errors.push('Total file size exceeds 50MB limit');
+    // Check individual file size (10MB limit)
+    else if (file.size > 10 * 1024 * 1024) {
+      errors.push(`File ${index + 1} (${file.name}): Exceeds 10MB limit`);
     }
+    // Check for duplicate filenames in the same batch
+    else if (Array.from(fileList).filter(f => f.name === file.name).length > 1) {
+      errors.push(`Duplicate filename: ${file.name}`);
+    }
+    else {
+      validFiles.push(file);
+    }
+  });
 
-    // Validate each file
-    Array.from(fileList).forEach((file, index) => {
-      // Check file type
-      if (file.type !== 'application/pdf') {
-        errors.push(`File ${index + 1} (${file.name}): Only PDF files allowed`);
-      }
-      // Check individual file size (10MB limit)
-      else if (file.size > 10 * 1024 * 1024) {
-        errors.push(`File ${index + 1} (${file.name}): Exceeds 10MB limit`);
-      }
-      // Check for duplicate filenames
-      else if (Array.from(fileList).filter(f => f.name === file.name).length > 1) {
-        errors.push(`Duplicate filename: ${file.name}`);
-      }
-      else {
-        validFiles.push(file);
-      }
-    });
-
-    return { errors, validFiles };
-  };
+  return { errors, validFiles };
+};
 
   const handleFileChange = (e) => {
     const selectedFiles = e.target.files;
@@ -271,6 +286,7 @@ export default function StatementCollectionForm({ params }) {
     formData.append('customerId', customer.id);
     formData.append('customerName', customerName);
     formData.append('accountNumber', accountNumber);
+    formData.append('filePassword', filePassword);
     formData.append('token', token);
 
     try {
@@ -574,6 +590,25 @@ export default function StatementCollectionForm({ params }) {
               </p>
             </div>
 
+            {/* Password Field (for protected PDFs) */}
+<div>
+  <label className="block text-sm font-medium text-gray-700 mb-1">
+    Document Password <span className="text-gray-400 text-xs">(optional)</span>
+  </label>
+  <input
+    type="password"
+    id="filePassword"
+    name="filePassword"
+    value={filePassword}
+    onChange={(e) => setFilePassword(e.target.value)}
+    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+    placeholder="Enter password if your statements are protected"
+  />
+  <p className="text-xs text-gray-500 mt-1">
+    If your PDF files require a password to open, enter it here. It will be stored securely and used when you view the documents.
+  </p>
+</div>
+
             {/* File Upload Area */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -614,7 +649,7 @@ export default function StatementCollectionForm({ params }) {
                 >
                   <input
                     type="file"
-                    accept=".pdf"
+                    accept=".pdf,.jpg,.jpeg,.png,.gif,.bmp,.tiff"
                     onChange={handleFileChange}
                     className="hidden"
                     id="file-upload"

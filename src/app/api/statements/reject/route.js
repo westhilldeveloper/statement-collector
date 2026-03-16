@@ -8,20 +8,16 @@ export async function POST(request) {
   try {
     const { statementId, reason } = await request.json();
 
-    // Get statement with customer details
     const statement = await prisma.statement.findUnique({
       where: { id: statementId },
       include: { customer: true }
     });
 
     if (!statement) {
-      return NextResponse.json(
-        { error: 'Statement not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Statement not found' }, { status: 404 });
     }
 
-    // Update statement status
+    // Mark the statement as REJECTED
     await prisma.statement.update({
       where: { id: statementId },
       data: {
@@ -31,20 +27,22 @@ export async function POST(request) {
       },
     });
 
+    // Get the latest statement for this customer
+    const latestStatement = await prisma.statement.findFirst({
+      where: { customerId: statement.customerId },
+      orderBy: { uploadedAt: 'desc' },
+    });
+
+    // Set customer status based on the latest statement
+    const newCustomerStatus = latestStatement?.status === 'APPROVED' ? 'APPROVED' : 'PENDING';
+
+    await prisma.customer.update({
+      where: { id: statement.customerId },
+      data: { status: newCustomerStatus },
+    });
+
+    // Send notifications (unchanged)
     const warnings = [];
-
-    // Send rejection WhatsApp
-    // try {
-    //   await sendRejectionWhatsApp(
-    //     statement.customer.phone,
-    //     statement.customer.name,
-    //     reason
-    //   );
-    // } catch (whatsappError) {
-    //   warnings.push(`WhatsApp failed: ${whatsappError.message}`);
-    // }
-
-    // Send rejection Email
     try {
       await sendRejectionEmail(
         statement.customer.email,
@@ -56,7 +54,6 @@ export async function POST(request) {
       warnings.push(`Email failed: ${emailError.message}`);
     }
 
-    // Create reminder record
     await prisma.reminder.create({
       data: {
         customerId: statement.customer.id,
@@ -72,12 +69,8 @@ export async function POST(request) {
       message: 'Statement rejected and notifications sent',
       warnings: warnings.length > 0 ? warnings : undefined,
     });
-
   } catch (error) {
     console.error('Rejection failed:', error);
-    return NextResponse.json(
-      { error: 'Failed to reject statement' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to reject statement' }, { status: 500 });
   }
 }

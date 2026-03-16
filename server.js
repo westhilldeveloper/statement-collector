@@ -21,6 +21,8 @@ app.prepare().then(() => {
     transports: ['websocket', 'polling']
   });
 
+  global.io = io;
+
   // Store connected users (for admin dashboard)
   const connectedAdmins = new Set();
   
@@ -41,8 +43,12 @@ app.prepare().then(() => {
 
     // ✅ ADD THIS MISSING HANDLER - Customer connection
     socket.on('customer-connect', (data) => {
+       if (!data?.customerId) {
+    console.warn('customer-connect received without customerId');
+    return;
+  }
       console.log('👤 Customer connect received:', data);
-      if (data.customerId) {
+      if (data?.customerId) {
         customerConnections.set(data.customerId, socket.id);
         socket.join(`customer-${data.customerId}`);
         console.log(`✅ Customer ${data.customerId} connected with socket ${socket.id}`);
@@ -72,9 +78,9 @@ app.prepare().then(() => {
       
       // Notify all admins about new upload
       io.emit('new-statement-upload', {
-        customerId: customer.id,
+        customerId: data.customerId,
         uploadedAt: new Date().toISOString(),
-        status: 'PENDING'
+        status: 'UPLOADED'
       });
       
       console.log('📤 Emitted new-statement-upload to admins');

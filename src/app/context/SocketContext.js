@@ -79,13 +79,20 @@ export const SocketProvider = ({ children, isAdmin = false, customerId = null })
     }
   }, [socket]);
 
+  const off = useCallback((event, callback) => {
+  if (socket) {
+    socket.off(event, callback);
+  }
+}, [socket]);
+
   return (
     <SocketContext.Provider value={{
       socket,
       isConnected,
       socketId,
       emit,
-      on
+      on,
+      off
     }}>
       {children}
     </SocketContext.Provider>

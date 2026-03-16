@@ -12,15 +12,25 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+// Allowed MIME types
+const ALLOWED_MIME_TYPES = [
+  'application/pdf',
+  'image/jpeg',
+  'image/png',
+  'image/gif',
+  'image/bmp',
+  'image/tiff'
+];
+
 export async function POST(request) {
   try {
     const formData = await request.formData();
     
-    // Get files array (multiple files with same field name)
     const files = formData.getAll("statements");
     const customerId = formData.get("customerId");
     const customerName = formData.get("customerName");
     const accountNumber = formData.get("accountNumber");
+    const filePassword = formData.get("filePassword") || null;
     const token = formData.get("token");
 
     // Log received data for debugging
@@ -40,7 +50,6 @@ export async function POST(request) {
       );
     }
 
-    // Check file count limit (max 10 files)
     if (files.length > 10) {
       return NextResponse.json(
         { error: "Maximum 10 files allowed", code: "MAX_FILES_EXCEEDED" }, 
@@ -55,15 +64,14 @@ export async function POST(request) {
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       
-      // Check if it's actually a file
       if (!file || typeof file === 'string' || !file.name) {
         fileErrors.push(`File ${i + 1}: Invalid file`);
         continue;
       }
 
-      // Check file type
-      if (file.type !== "application/pdf") {
-        fileErrors.push(`File ${i + 1} (${file.name}): Only PDF files allowed`);
+      // Check MIME type
+      if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+        fileErrors.push(`File ${i + 1} (${file.name}): Only PDF and image files allowed`);
         continue;
       }
 
@@ -77,12 +85,12 @@ export async function POST(request) {
       const isDuplicate = validFiles.some(f => f.name === file.name);
       if (isDuplicate) {
         fileErrors.push(`File ${i + 1} (${file.name}): Duplicate filename in same upload`);
+        continue;
       }
 
       validFiles.push(file);
     }
 
-    // If no valid files, return error
     if (validFiles.length === 0) {
       return NextResponse.json(
         { 
@@ -102,15 +110,9 @@ export async function POST(request) {
       );
     }
 
-    // Check if customer exists and token is valid
     const customer = await prisma.customer.findFirst({
-      where: { 
-        id: customerId, 
-        token: token 
-      },
-      include: {
-        statements: true
-      }
+      where: { id: customerId, token: token },
+      include: { statements: true }
     });
 
     if (!customer) {
@@ -120,7 +122,6 @@ export async function POST(request) {
       );
     }
 
-    // Check if token is expired
     if (new Date() > customer.tokenExpiry) {
       return NextResponse.json(
         { error: "Link expired", code: "TOKEN_EXPIRED" },
@@ -128,7 +129,6 @@ export async function POST(request) {
       );
     }
 
-    // Check total statements limit (optional - prevent abuse)
     const totalStatements = customer.statements?.length || 0;
     if (totalStatements + validFiles.length > 20) {
       return NextResponse.json(
@@ -144,13 +144,11 @@ export async function POST(request) {
 
     const timestamp = Date.now();
     
-    // Upload all files to Cloudinary
     const uploadResults = [];
     const uploadErrors = [];
     
     for (let i = 0; i < validFiles.length; i++) {
       const file = validFiles[i];
-      // Create a clean filename for Cloudinary
       const cleanFileName = file.name
         .replace(/[^a-z0-9.]/gi, '_')
         .toLowerCase();
@@ -162,11 +160,15 @@ export async function POST(request) {
         const buffer = Buffer.from(bytes);
         const base64File = buffer.toString("base64");
 
+        // Determine resource_type based on MIME type
+        const isImage = file.type.startsWith('image/');
+        const resourceType = isImage ? 'image' : 'raw';
+
         const uploadResult = await cloudinary.uploader.upload(
-          `data:application/pdf;base64,${base64File}`,
+          `data:${file.type};base64,${base64File}`,
           {
             public_id: publicId,
-            resource_type: "raw",
+            resource_type: resourceType,
             folder: "statements",
           }
         );
@@ -188,7 +190,6 @@ export async function POST(request) {
       }
     }
 
-    // If no files uploaded successfully
     if (uploadResults.length === 0) {
       return NextResponse.json(
         { 
@@ -200,18 +201,15 @@ export async function POST(request) {
       );
     }
 
-    // Save all successfully uploaded files to database with transaction
+    // Save to database with transaction
     let createdStatements = [];
     let dbErrors = [];
     
-    // Use transaction for atomic operation
     try {
       const result = await prisma.$transaction(async (prisma) => {
         const statements = [];
-        
         for (const result of uploadResults) {
           try {
-            // Remove accountNumber from the data object since it doesn't exist in schema
             const statement = await prisma.statement.create({
               data: {
                 customerId,
@@ -220,10 +218,9 @@ export async function POST(request) {
                 mimeType: result.file.type,
                 cloudinaryUrl: result.uploadResult.secure_url,
                 publicId: result.uploadResult.public_id,
+                password: filePassword,
                 status: "PENDING",
                 uploadedAt: new Date(),
-                // Note: accountNumber is not included as it doesn't exist in the schema
-                // If you need to store accountNumber, you need to add it to your Prisma schema first
               },
             });
             statements.push(statement);
@@ -236,7 +233,6 @@ export async function POST(request) {
             });
           }
         }
-        
         return statements;
       });
       
@@ -248,7 +244,7 @@ export async function POST(request) {
       for (const result of uploadResults) {
         try {
           await cloudinary.uploader.destroy(result.uploadResult.public_id, {
-            resource_type: "raw",
+            resource_type: result.file.type.startsWith('image/') ? 'image' : 'raw',
           });
         } catch (rollbackError) {
           console.error("Rollback failed:", rollbackError);
@@ -265,7 +261,6 @@ export async function POST(request) {
       );
     }
 
-    // Prepare response
     const response = {
       success: true,
       message: `Successfully uploaded ${createdStatements.length} of ${validFiles.length} files`,
@@ -279,7 +274,6 @@ export async function POST(request) {
       }
     };
 
-    // Add warnings if there were issues
     if (uploadErrors.length > 0 || dbErrors.length > 0 || fileErrors.length > 0) {
       response.warnings = {
         fileErrors: fileErrors.length > 0 ? fileErrors : undefined,
@@ -288,7 +282,7 @@ export async function POST(request) {
       };
     }
 
-    return NextResponse.json(response, { status: 207 }); // 207 Multi-Status
+    return NextResponse.json(response, { status: 207 });
 
   } catch (error) {
     console.error("Unexpected Error:", error);

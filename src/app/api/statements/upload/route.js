@@ -6,19 +6,15 @@ export async function POST(request) {
   try {
     const { token, cloudinaryUrl, publicId, fileSize, fileName, mimeType } = await request.json();
 
-    // Find customer
     const customer = await prisma.customer.findUnique({
       where: { token }
     });
 
     if (!customer) {
-      return NextResponse.json(
-        { error: 'Customer not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Customer not found' }, { status: 404 });
     }
 
-    // Create statement record
+    // Create the statement (status = PENDING)
     const statement = await prisma.statement.create({
       data: {
         customerId: customer.id,
@@ -31,17 +27,20 @@ export async function POST(request) {
       },
     });
 
-    // Check if this is a resubmission after rejection
+    // After upload, the latest statement is PENDING → customer becomes PENDING
+    await prisma.customer.update({
+      where: { id: customer.id },
+      data: { status: 'PENDING' },
+    });
+
+    // (Optional) Check for rejected statements and log resubmission
     const rejectedStatements = await prisma.statement.findMany({
       where: {
         customerId: customer.id,
         status: 'REJECTED',
       },
     });
-
-    // If this is a resubmission, send confirmation
     if (rejectedStatements.length > 0) {
-      // You could send a notification that resubmission was received
       console.log('Resubmission received for customer:', customer.id);
     }
 
@@ -56,12 +55,8 @@ export async function POST(request) {
         status: statement.status,
       },
     });
-
   } catch (error) {
     console.error('Statement upload failed:', error);
-    return NextResponse.json(
-      { error: 'Failed to save statement' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to save statement' }, { status: 500 });
   }
 }
