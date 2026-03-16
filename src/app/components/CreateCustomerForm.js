@@ -48,7 +48,7 @@ export default function CreateCustomerForm({ onSuccess, onCancel }) {
               required
               value={formData.userId}
               onChange={(e) => setFormData({...formData, userId: e.target.value})}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent uppercase"
               placeholder="e.g., USR001"
             />
           </div>
@@ -59,9 +59,10 @@ export default function CreateCustomerForm({ onSuccess, onCancel }) {
                   <input
                     type="text"
                     required
+                    
                     value={formData.name}
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent uppercase"
                     placeholder="e.g., John Smith"
                   />
                 </div>
@@ -72,10 +73,13 @@ export default function CreateCustomerForm({ onSuccess, onCancel }) {
                   <input
                     type="tel"
                     required
+                    
                     value={formData.phone}
-                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                    onChange={(e) =>{ 
+                      const numericValue = e.target.value.replace(/\D/g, '').slice(0, 10);
+                      setFormData({...formData, phone: numericValue})}}
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="e.g., +44 20 7123 4567"
+                    placeholder="e.g.,  90 7123 4567"
                   />
                 </div>
                 <div>
@@ -86,7 +90,7 @@ export default function CreateCustomerForm({ onSuccess, onCancel }) {
                     type="email"
                     required
                     value={formData.email}
-                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                    onChange={(e) => setFormData({...formData, email: e.target.value.toLowerCase()})}
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="e.g., john.smith@example.com"
                   />

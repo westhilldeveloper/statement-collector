@@ -14,7 +14,8 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Customer not found' }, { status: 404 });
     }
 
-    // Create the statement (status = PENDING)
+    
+    // Create the statement (status = UPLOADED)
     const statement = await prisma.statement.create({
       data: {
         customerId: customer.id,

@@ -13,6 +13,7 @@ export default function CustomerRow({ customer, onAction, actionLoading, onPrevi
     ? statements.sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt))[0].status
     : customer.status;
 
+    console.log("customer===>", customer.statements[0])
   const uploadStatus = customer.status === 'APPROVED' ? 'UPLOADED' : 'PENDING';
   const uploadStatusColor = uploadStatus === 'UPLOADED' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800';
 
@@ -58,7 +59,7 @@ export default function CustomerRow({ customer, onAction, actionLoading, onPrevi
       {/* Upload Status */}
       <td className="px-6 py-5 align-top">
         <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${uploadStatusColor}`}>
-          {uploadStatus === 'UPLOADED' ? (
+          {hasStatements > 0 &&  customer.statements[0].status !== "REJECTED" ? (
             <>
               <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -113,9 +114,9 @@ export default function CustomerRow({ customer, onAction, actionLoading, onPrevi
       {/* Review Status */}
       <td className="px-6 py-5 align-top">
         <div className="space-y-3">
-          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStatusBadge(overallStatus)}`}>
+          {/* <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStatusBadge(overallStatus)}`}>
             {overallStatus}
-          </span>
+          </span> */}
           <div className="flex items-center space-x-4 text-xs">
             <div className="flex items-center space-x-1">
               <span className={`inline-block w-2.5 h-2.5 rounded-full ${customer.emailSent ? 'bg-emerald-500' : 'bg-gray-300'}`} />

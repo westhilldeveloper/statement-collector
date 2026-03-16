@@ -82,5 +82,5 @@ enum StatementStatus {
   PENDING
   REJECTED
   APPROVED
-  UPLOADED 
+  UPLOADED
 }
