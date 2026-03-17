@@ -113,7 +113,7 @@ io.on('connection', (socket) => {
   });
 });
 
-const PORT = process.env.SOCKET_PORT || 3001;
+const PORT = process.env.SOCKET_PORT || 10000;
 const HOST = '0.0.0.0';
 server.listen(PORT, HOST, () => {
   console.log(`🚀 Socket.io server running on port ${HOST}:${PORT}`);
