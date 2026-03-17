@@ -331,12 +331,11 @@ export default function StatementCollectionForm({ params }) {
 
         // If some files uploaded successfully, show results
         if (data.data?.uploaded?.length > 0) {
-
-          
-          // Don't redirect immediately, show results first
-          setTimeout(() => {
-            router.push('/thank-you');
-          }, 3000);
+        setFiles([]);
+        setAccountNumber('');
+        setFilePassword('');
+        setValidationErrors([]);
+        fetchCustomerStatements();
         } else {
           // No files uploaded successfully
           alert('Upload failed: ' + (data.error || 'Unknown error'));
@@ -763,7 +762,7 @@ export default function StatementCollectionForm({ params }) {
                     </p>
                     {uploadResults.uploaded.length > 0 && (
                       <p className="text-xs text-emerald-600 mt-1">
-                        Redirecting to confirmation page...
+                       You can check your statement status in this page
                       </p>
                     )}
                   </div>
@@ -826,10 +825,8 @@ export default function StatementCollectionForm({ params }) {
           </form>
         </div>
 
-        {/* Footer */}
-        <p className="text-center text-xs text-gray-500 mt-6">
-          © {new Date().getFullYear()} Your Company Name. All rights reserved.
-        </p>
+      
+       
       </div>
 
       {/* Statement Details Modal */}

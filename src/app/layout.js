@@ -1,7 +1,7 @@
 import { Toaster } from 'react-hot-toast';
 import { SocketProvider } from './context/SocketContext';
-import NavBar from './components/NavBar';
 import './globals.css';
+import NavBarWrapper from './components/NavBarWrapper';
 
 export const metadata = {
   title: 'Finovest Careers - Bank Statement Collection',
@@ -14,7 +14,7 @@ export default function RootLayout({ children }) {
       <body className="bg-gray-50 h-full">
         <SocketProvider>
           <div className="flex flex-col min-h-full">
-          <NavBar />
+          <NavBarWrapper />
           <main className="flex-1">
             {children}
             <Toaster position="top-right" />
