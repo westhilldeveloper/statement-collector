@@ -114,6 +114,7 @@ io.on('connection', (socket) => {
 });
 
 const PORT = process.env.SOCKET_PORT || 3001;
-server.listen(PORT, () => {
-  console.log(`🚀 Socket.io server running on port ${PORT}`);
+const HOST = '0.0.0.0';
+server.listen(PORT, HOST, () => {
+  console.log(`🚀 Socket.io server running on port ${HOST}:${PORT}`);
 });
