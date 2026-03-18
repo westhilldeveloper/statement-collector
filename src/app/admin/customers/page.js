@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { useCustomers } from '@/app/hooks/useCustomers';
 import { formatDate, getCustomerStatusBadge } from '@/app/utils/formatters';
@@ -14,19 +15,37 @@ export default function AdminCustomersPage() {
     setFilter,
     goToPage,
     refetch,
-  } = useCustomers({ limit: 10 }); // initial limit 10 (default)
+  } = useCustomers({ limit: 10 });
 
-  const handleDelete = async (id) => {
-    if (!confirm('Are you sure you want to delete this customer? All associated statements and reminders will also be deleted.')) return;
+  // State for delete confirmation modal and per‑row loading
+  const [deleteConfirm, setDeleteConfirm] = useState({ isOpen: false, customerId: null });
+  const [deletingIds, setDeletingIds] = useState({});
+
+  const openDeleteConfirm = (id) => {
+    setDeleteConfirm({ isOpen: true, customerId: id });
+  };
+
+  const closeDeleteConfirm = () => {
+    setDeleteConfirm({ isOpen: false, customerId: null });
+  };
+
+  const handleDeleteConfirmed = async () => {
+    const id = deleteConfirm.customerId;
+    if (!id) return;
+    closeDeleteConfirm();
+
+    setDeletingIds(prev => ({ ...prev, [id]: true }));
     try {
       const res = await fetch(`/api/admin/customers/${id}`, { method: 'DELETE' });
       if (res.ok) {
-        refetch(); // refresh list after delete
+        refetch(); // refresh list after successful delete
       } else {
         alert('Delete failed');
       }
     } catch (error) {
       alert('Delete failed');
+    } finally {
+      setDeletingIds(prev => ({ ...prev, [id]: false }));
     }
   };
 
@@ -42,7 +61,6 @@ export default function AdminCustomersPage() {
           </div>
           <h1 className="text-2xl font-semibold text-gray-900">Manage Customers</h1>
         </div>
-        {/* Optional "New Customer" button – kept commented as in original */}
       </div>
 
       {/* Filter Bar */}
@@ -68,7 +86,6 @@ export default function AdminCustomersPage() {
             <option value="">All Statuses</option>
             <option value="PENDING">Pending</option>
             <option value="APPROVED">Approved</option>
-            {/* Additional statuses commented as in original */}
           </select>
         </div>
       </div>
@@ -95,8 +112,8 @@ export default function AdminCustomersPage() {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {customers.map((c) => {
-                  const statusBadgeClass = getCustomerStatusBadge(c.statements[0].status);
-                  const statementStatus = c.statements[0].status;
+                  const statusBadgeClass = getCustomerStatusBadge( c.statements[0]?.status || c.status);
+                  const statementStatus = c.statements[0]?.status || c.status;
                   return (
                     <tr key={c.id} className="group hover:bg-gray-50 transition-colors">
                       <td className="px-6 py-4 text-sm font-mono text-gray-600">{c.userId}</td>
@@ -121,13 +138,21 @@ export default function AdminCustomersPage() {
                             </svg>
                           </Link>
                           <button
-                            onClick={() => handleDelete(c.id)}
-                            className="text-gray-400 hover:text-red-600"
+                            onClick={() => openDeleteConfirm(c.id)}
+                            disabled={deletingIds[c.id]}
+                            className="text-gray-400 hover:text-red-600 disabled:opacity-50"
                             title="Delete customer"
                           >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
+                            {deletingIds[c.id] ? (
+                              <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                              </svg>
+                            ) : (
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            )}
                           </button>
                         </div>
                       </td>
@@ -149,6 +174,32 @@ export default function AdminCustomersPage() {
           </div>
           <Pagination pagination={pagination} onPageChange={goToPage} />
         </>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirm.isOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 max-w-md w-full">
+            <h3 className="text-lg font-semibold mb-4">Confirm Delete</h3>
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to delete this customer? All associated statements and reminders will also be deleted.
+            </p>
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={closeDeleteConfirm}
+                className="px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteConfirmed}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

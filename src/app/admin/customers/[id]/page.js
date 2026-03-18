@@ -233,8 +233,8 @@ export default function CustomerDetailPage({ params }) {
               </svg>
               <div>
                 {/* <p className="text-xs text-gray-500 uppercase tracking-wider">Status</p> */}
-                <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium ${getStatusBadge(customer.statements[0].status)}`}>
-                  { customer.statements[0].status}
+                <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium ${getStatusBadge(customer.statements[0]?.status || customer.status)}`}>
+                  { customer.statements[0]?.status || customer.status}
                 </span>
               </div>
             </div>
