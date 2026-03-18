@@ -27,7 +27,7 @@ export default function CustomerRow({ customer, onAction, actionLoading, onPrevi
       <td className="px-6 py-5 align-top">
         <div className="flex items-start space-x-4">
           <div className="flex-shrink-0">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold text-lg shadow-sm">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-pink-500 via-pink-300 to-purple-600 flex items-center justify-center text-white font-semibold text-lg shadow-sm">
               {customer.name?.charAt(0).toUpperCase()}
             </div>
           </div>
@@ -58,7 +58,7 @@ export default function CustomerRow({ customer, onAction, actionLoading, onPrevi
 
       {/* Upload Status */}
       <td className="px-6 py-5 align-top">
-        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${uploadStatusColor}`}>
+        <span className={`inline-flex items-center px-3 py-1 rounded-sm border-1 border-gray-400 text-xs font-medium ${uploadStatusColor}`}>
           {hasStatements > 0 &&  customer.statements[0].status !== "REJECTED" ? (
             <>
               <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
@@ -135,7 +135,7 @@ export default function CustomerRow({ customer, onAction, actionLoading, onPrevi
         <div className="flex flex-col space-y-2">
           <button
             onClick={() => window.open(`/collect/${customer.token}`, '_blank')}
-            className="inline-flex items-center justify-center px-4 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors text-sm font-medium"
+            className="inline-flex items-center justify-center px-4 py-2 bg-blue-50 text-blue-700 rounded-md hover:bg-blue-100 transition-colors text-sm font-medium"
           >
             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />

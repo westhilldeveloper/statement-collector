@@ -58,14 +58,14 @@ export default function DashboardPage() {
 
   return (
     <div className="h-full flex flex-col bg-gray-50">
-    <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 flex-1 flex flex-col min-h-0">
+    <div className="w-screen mx-auto py-6 px-4 sm:px-6 lg:px-8 flex-1 flex flex-col min-h-0">
         {/* Header with create button */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-light text-gray-900">
+            <h1 className="text-2xl sm:text-3xl font-light text-pink-600">
               Statement Collection
             </h1>
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-sm text-purple-500">
               Manage customer statements and collection requests
             </p>
           </div>
@@ -73,8 +73,8 @@ export default function DashboardPage() {
             onClick={() => setShowForm(!showForm)}
             className={`inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               showForm
-                ? 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                : 'bg-blue-600 text-white hover:bg-blue-700'
+                ? 'bg-purple-600 text-white hover:bg-pink-600'
+                : 'bg-pink-600 text-white hover:bg-purple-700'
             }`}
           >
             <svg
@@ -111,8 +111,8 @@ export default function DashboardPage() {
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex-1 flex flex-col min-h-0 mt-4">
            <div className="overflow-x-auto overflow-y-auto flex-1">
             
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="min-w-full divide-y divide-pink-200">
+              <thead className="bg-pink-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Customer

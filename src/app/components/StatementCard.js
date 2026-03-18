@@ -5,13 +5,13 @@ import { getStatusBadge, formatDate } from '../utils/formatters';
 
 export default function StatementCard({ statement, onApprove, onReject, onPreview, onDownload, actionLoading }) {
   return (
-    <div className="p-3 bg-gray-50 rounded-lg border border-gray-100 hover:border-gray-200 transition-colors">
+    <div className="p-3 bg-gray-80 rounded-lg border border-gray-600 hover:bg-gray-100 transition-colors">
       {/* Header with filename and status badge */}
       <div className="flex items-center justify-between mb-2">
         <span className="text-sm font-medium text-gray-900 truncate max-w-[160px]" title={statement.fileName}>
           {statement.fileName}
         </span>
-        <span className={`text-xs px-2 py-1 rounded-full font-medium ${getStatusBadge(statement.status)}`}>
+        <span className={`text-xs px-2 py-1 rounded-sm border-1 border-gray-400 font-medium ${getStatusBadge(statement.status)}`}>
           {statement.status}
         </span>
       </div>

@@ -67,12 +67,12 @@ export default function AdminCustomersPage() {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Manage Customers</h1>
-        <Link
+        {/* <Link
           href="/admin/customers/new"
           className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
         >
           + New Customer
-        </Link>
+        </Link> */}
       </div>
 
       <div className="flex flex-wrap gap-4 mb-6">
@@ -91,8 +91,8 @@ export default function AdminCustomersPage() {
           <option value="">All Statuses</option>
           <option value="PENDING">Pending</option>
           <option value="APPROVED">Approved</option>
-          <option value="REJECTED">Rejected</option>
-          <option value="EXPIRED">Expired</option>
+          {/* <option value="REJECTED">Rejected</option> */}
+          {/* <option value="EXPIRED">Expired</option> */}
         </select>
       </div>
 

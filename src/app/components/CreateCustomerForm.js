@@ -36,24 +36,24 @@ export default function CreateCustomerForm({ onSuccess, onCancel }) {
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
-      <h2 className="text-lg font-medium text-gray-900 mb-4">Create New Collection Request</h2>
+      <h2 className="text-lg font-medium text-pink-600 mb-4">Create New Collection Request</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              User ID <span className="text-rose-500">*</span>
+            <label className="block text-sm font-medium text-purple-600 mb-1">
+              Customer ID <span className="text-rose-500">*</span>
             </label>
             <input
               type="text"
               required
               value={formData.userId}
               onChange={(e) => setFormData({...formData, userId: e.target.value})}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent uppercase"
-              placeholder="e.g., USR001"
+              className="w-full border border-pink-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent uppercase"
+              placeholder="e.g.,  COIN001"
             />
           </div>
          <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-purple-600 mb-1">
                     Full Name <span className="text-rose-500">*</span>
                   </label>
                   <input
@@ -62,12 +62,12 @@ export default function CreateCustomerForm({ onSuccess, onCancel }) {
                     
                     value={formData.name}
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent uppercase"
+                    className="w-full border border-pink-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent uppercase"
                     placeholder="e.g., John Smith"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-purple-600 mb-1">
                     Phone Number <span className="text-rose-500">*</span>
                   </label>
                   <input
@@ -78,12 +78,12 @@ export default function CreateCustomerForm({ onSuccess, onCancel }) {
                     onChange={(e) =>{ 
                       const numericValue = e.target.value.replace(/\D/g, '').slice(0, 10);
                       setFormData({...formData, phone: numericValue})}}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-pink-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                     placeholder="e.g.,  90 7123 4567"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-purple-600 mb-1">
                     Email <span className="text-rose-500">*</span>
                   </label>
                   <input
@@ -91,7 +91,7 @@ export default function CreateCustomerForm({ onSuccess, onCancel }) {
                     required
                     value={formData.email}
                     onChange={(e) => setFormData({...formData, email: e.target.value.toLowerCase()})}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-pink-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                     placeholder="e.g., john.smith@example.com"
                   />
                 </div>
@@ -107,7 +107,7 @@ export default function CreateCustomerForm({ onSuccess, onCancel }) {
           <button
             type="submit"
             disabled={submitting}
-            className="inline-flex items-center px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-300"
+            className="inline-flex items-center px-6 py-2 bg-pink-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-300"
           >
             {submitting ? 'Creating...' : 'Create & Send Links'}
           </button>
