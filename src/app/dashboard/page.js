@@ -58,7 +58,7 @@ export default function DashboardPage() {
 
   return (
     <div className="h-full flex flex-col bg-gray-50">
-    <div className="w-screen mx-auto py-6 px-4 sm:px-6 lg:px-8 flex-1 flex flex-col min-h-0">
+    <div className=" mx-auto py-6 px-4 sm:px-6 lg:px-8 flex-1 flex flex-col min-h-0">
         {/* Header with create button */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0">
           <div>

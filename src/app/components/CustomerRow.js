@@ -117,7 +117,7 @@ export default function CustomerRow({ customer, onAction, actionLoading, onPrevi
           {/* <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStatusBadge(overallStatus)}`}>
             {overallStatus}
           </span> */}
-          <div className="flex items-center space-x-4 text-xs">
+          <div className="flex flex-col justify-start items-start space-y-4 text-xs">
             <div className="flex items-center space-x-1">
               <span className={`inline-block w-2.5 h-2.5 rounded-full ${customer.emailSent ? 'bg-emerald-500' : 'bg-gray-300'}`} />
               <span className="text-gray-600">Email</span>
