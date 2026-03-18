@@ -1,50 +1,27 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { formatDate } from '@/app/utils/formatters';
+import { useCustomers } from '@/app/hooks/useCustomers';
+import { formatDate, getCustomerStatusBadge } from '@/app/utils/formatters';
 import Pagination from '@/app/components/Pagination';
 
 export default function AdminCustomersPage() {
-  const [customers, setCustomers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [page, setPage] = useState(1);
-  const [pagination, setPagination] = useState({ total: 0, pages: 0, page: 1, limit: 10 });
-
-  const fetchCustomers = async () => {
-    setLoading(true);
-    const params = new URLSearchParams({
-      page,
-      limit: 10,
-      ...(search && { search }),
-      ...(statusFilter && { status: statusFilter }),
-    });
-    try {
-      const res = await fetch(`/api/admin/customers?${params}`);
-      const data = await res.json();
-      if (data.success) {
-        setCustomers(data.customers);
-        setPagination(data.pagination);
-      }
-    } catch (error) {
-      console.error('Failed to fetch customers', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchCustomers();
-  }, [page, search, statusFilter]);
+  const {
+    customers,
+    loading,
+    pagination,
+    filters,
+    setFilter,
+    goToPage,
+    refetch,
+  } = useCustomers({ limit: 10 }); // initial limit 10 (default)
 
   const handleDelete = async (id) => {
     if (!confirm('Are you sure you want to delete this customer? All associated statements and reminders will also be deleted.')) return;
     try {
       const res = await fetch(`/api/admin/customers/${id}`, { method: 'DELETE' });
       if (res.ok) {
-        fetchCustomers();
+        refetch(); // refresh list after delete
       } else {
         alert('Delete failed');
       }
@@ -53,100 +30,124 @@ export default function AdminCustomersPage() {
     }
   };
 
-  const getStatusBadge = (status) => {
-    switch (status) {
-      case 'APPROVED': return 'bg-green-100 text-green-800';
-      case 'REJECTED': return 'bg-red-100 text-red-800';
-      case 'PENDING': return 'bg-yellow-100 text-yellow-800';
-      case 'EXPIRED': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Manage Customers</h1>
-        {/* <Link
-          href="/admin/customers/new"
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-        >
-          + New Customer
-        </Link> */}
+    <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center space-x-3">
+          <div className="p-2 bg-blue-100 rounded-lg">
+            <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+          </div>
+          <h1 className="text-2xl font-semibold text-gray-900">Manage Customers</h1>
+        </div>
+        {/* Optional "New Customer" button – kept commented as in original */}
       </div>
 
-      <div className="flex flex-wrap gap-4 mb-6">
-        <input
-          type="text"
-          placeholder="Search by name, email, ID..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="border rounded-lg px-4 py-2 w-64"
-        />
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="border rounded-lg px-4 py-2"
-        >
-          <option value="">All Statuses</option>
-          <option value="PENDING">Pending</option>
-          <option value="APPROVED">Approved</option>
-          {/* <option value="REJECTED">Rejected</option> */}
-          {/* <option value="EXPIRED">Expired</option> */}
-        </select>
+      {/* Filter Bar */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6 flex flex-wrap gap-4 items-center">
+        <div className="flex-1 min-w-[200px] relative">
+          <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input
+            type="text"
+            placeholder="Search by name, email, ID..."
+            value={filters.search || ''}
+            onChange={(e) => setFilter('search', e.target.value)}
+            className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+        </div>
+        <div className="w-48">
+          <select
+            value={filters.status || ''}
+            onChange={(e) => setFilter('status', e.target.value)}
+            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          >
+            <option value="">All Statuses</option>
+            <option value="PENDING">Pending</option>
+            <option value="APPROVED">Approved</option>
+            {/* Additional statuses commented as in original */}
+          </select>
+        </div>
       </div>
 
+      {/* Customers Table */}
       {loading ? (
-        <div className="text-center py-12">Loading...</div>
+        <div className="flex justify-center items-center py-20">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
       ) : (
         <>
-          <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Created</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {customers.map((c) => (
-                  <tr key={c.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 text-sm">{c.userId}</td>
-                    <td className="px-6 py-4 text-sm font-medium">{c.name}</td>
-                    <td className="px-6 py-4 text-sm">{c.email}</td>
-                    <td className="px-6 py-4 text-sm">{c.phone}</td>
-                    <td className="px-6 py-4">
-                      <span className={`px-2 py-1 text-xs rounded-full ${getStatusBadge(c.status)}`}>
-                        {c.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-sm">{formatDate(c.createdAt)}</td>
-                    <td className="px-6 py-4 text-sm space-x-2">
-                      <Link href={`/admin/customers/${c.id}`} className="text-blue-600 hover:underline">
-                        Edit
-                      </Link>
-                      <button onClick={() => handleDelete(c.id)} className="text-red-600 hover:underline">
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                {customers.map((c) => {
+                  const statusBadgeClass = getCustomerStatusBadge(c.statements[0].status);
+                  const statementStatus = c.statements[0].status;
+                  return (
+                    <tr key={c.id} className="group hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-4 text-sm font-mono text-gray-600">{c.userId}</td>
+                      <td className="px-6 py-4 text-sm font-medium text-gray-900">{c.name}</td>
+                      <td className="px-6 py-4 text-sm text-gray-600">{c.email}</td>
+                      <td className="px-6 py-4 text-sm text-gray-600">{c.phone}</td>
+                      <td className="px-6 py-4">
+                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${statusBadgeClass}`}>
+                          {statementStatus}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-600">{formatDate(c.createdAt)}</td>
+                      <td className="px-6 py-4 text-sm">
+                        <div className="flex items-center space-x-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Link
+                            href={`/admin/customers/${c.id}`}
+                            className="text-gray-400 hover:text-blue-600"
+                            title="Edit customer"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                          </Link>
+                          <button
+                            onClick={() => handleDelete(c.id)}
+                            className="text-gray-400 hover:text-red-600"
+                            title="Delete customer"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
                 {customers.length === 0 && (
                   <tr>
                     <td colSpan="7" className="px-6 py-12 text-center text-gray-500">
-                      No customers found.
+                      <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                      </svg>
+                      <p className="text-gray-500">No customers found.</p>
                     </td>
                   </tr>
                 )}
               </tbody>
             </table>
           </div>
-          <Pagination pagination={pagination} onPageChange={setPage} />
+          <Pagination pagination={pagination} onPageChange={goToPage} />
         </>
       )}
     </div>

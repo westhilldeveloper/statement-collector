@@ -5,7 +5,7 @@ import { getStatusBadge, formatDate } from '../utils/formatters';
 
 export default function StatementCard({ statement, onApprove, onReject, onPreview, onDownload, actionLoading }) {
   return (
-    <div className="p-3 bg-gray-80 rounded-lg border border-gray-600 hover:bg-gray-100 transition-colors">
+    <div className="p-3 bg-gray-80 rounded-lg border border-pink-300 hover:bg-gray-100 transition-colors">
       {/* Header with filename and status badge */}
       <div className="flex items-center justify-between mb-2">
         <span className="text-sm font-medium text-gray-900 truncate max-w-[160px]" title={statement.fileName}>
