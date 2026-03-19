@@ -42,6 +42,9 @@ export default function NavBar() {
             <a href="/dashboard" className="text-pink-700 font-bold hover:text-purple-600 px-3 py-2">
               Dashboard
             </a>
+            <a href="/admin" className="text-pink-700 font-bold hover:text-purple-600 px-3 py-2">
+              Manage
+            </a>
           </div>
           <button
             onClick={handleLogout}

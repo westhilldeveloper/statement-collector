@@ -19,10 +19,10 @@ export default function RootLayout({ children }) {
             {children}
             <Toaster position="top-right" />
           </main>
-          <footer className="bg-white border-t ">
+          <footer className="bg-white border-t border-pink-500 ">
             <div className="max-w-7xl mx-auto px-4 py-6">
               <p className="text-center text-gray-500 text-sm">
-                © 2024 Finovest Careers. All rights reserved.
+                © 2026 Finovest Chits & Kuries. All rights reserved.
               </p>
             </div>
           </footer>
