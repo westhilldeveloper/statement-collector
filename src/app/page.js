@@ -123,7 +123,7 @@ export default function HomePage() {
   </div>
 
   {/* Content */}
-  <div className="relative max-w-7xl mx-auto px-4 py-16 md:py-24 z-10">
+  <div className="relative max-w-7xl mx-auto px-4 py-16 md:py-24">
     <div className="text-center">
       <h1 className="text-4xl md:text-5xl font-bold mb-4">
         Bank Statement Collection Portal
@@ -151,7 +151,7 @@ export default function HomePage() {
 
       {/* Stats Section */}
       <div className="max-w-7xl mx-auto px-4 py-12">
-  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+  <div className="grid grid-cols-1 shadow-md md:grid-cols-3 gap-6">
     {/* Total Requests */}
     <div className="bg-white rounded-lg shadow-lg p-6 text-center">
       <div className="flex justify-center mb-3">
@@ -180,13 +180,13 @@ export default function HomePage() {
 </div>
 
       {/* How It Works Section */}
-      <div id="how-it-works" className="bg-gray-100 py-16">
+      <div id="how-it-works"  className="bg-gray-100 shadow-md py-16">
         <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center text-pink-600 mb-12">How It Works</h2>
+          <h2 className="text-3xl font-bold  text-center text-pink-600 mb-12">How It Works</h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 shadow-md md:grid-cols-3 gap-8">
             <div className="bg-white rounded-lg shadow-lg p-6 text-center">
-              <div className="text-5xl p-5 text-white bg-gradient-to-r from-pink-600 to-purple-600 font-bold mb-4">1</div>
+              <div className="text-5xl p-5 text-white bg-gradient-to-r from-pink-600 shadow-lg to-purple-600 font-bold mb-4">1</div>
               <h3 className="text-xl text-pink-600 font-semibold mb-2">Create Request</h3>
               <p className="text-purple-600 text-sm">
                 Add customer details and send unique collection links via WhatsApp & Email
@@ -194,7 +194,7 @@ export default function HomePage() {
             </div>
             
             <div className="bg-white rounded-lg shadow-lg p-6 text-center">
-              <div className="text-5xl p-5 text-white bg-gradient-to-r from-pink-600 to-purple-600 font-bold mb-4">2</div>
+              <div className="text-5xl p-5 text-white bg-gradient-to-r from-pink-600 shadow-lg to-purple-600 font-bold mb-4">2</div>
               <h3 className="text-xl text-pink-600 font-semibold mb-2">Customer Uploads</h3>
               <p className="text-purple-600 text-sm">
                 Customers click the link and upload multiple PDF statements securely
@@ -202,7 +202,7 @@ export default function HomePage() {
             </div>
             
             <div className="bg-white rounded-lg shadow-lg p-6 text-center">
-              <div className="text-5xl p-5 text-white bg-gradient-to-r from-pink-600 to-purple-600 font-bold mb-4">3</div>
+              <div className="text-5xl p-5 text-white bg-gradient-to-r from-pink-600 shadow-lg to-purple-600 font-bold mb-4">3</div>
               <h3 className="text-xl text-pink-600 font-semibold mb-2">Review & Process</h3>
               <p className="text-purple-600 text-sm">
                 Review statements, approve or reject with automatic customer notifications
@@ -218,9 +218,9 @@ export default function HomePage() {
 <div className="max-w-7xl mx-auto px-4 py-16">
   <h2 className="text-3xl font-bold text-purple-600 text-center mb-12">Key Features</h2>
 
-  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+  <div className="grid grid-cols-1 md:grid-cols-2 shadow-md lg:grid-cols-4 gap-6">
     {/* WhatsApp Integration → phone-call.gif */}
-    <div className="bg-white rounded-lg shadow border border-purple-600 p-6 text-center">
+    <div className="bg-white rounded-lg  border shadow-md border-gray-600 p-6 text-center">
       <div className="flex justify-center mb-4">
         <Image
           src="/images/phone-call.gif"
@@ -235,7 +235,7 @@ export default function HomePage() {
     </div>
 
     {/* Email Notifications → message.gif */}
-    <div className="bg-white rounded-lg shadow border border-purple-600 p-6 text-center">
+    <div className="bg-white rounded-lg shadow border border-gray-600 p-6 text-center">
       <div className="flex justify-center mb-4">
         <Image
           src="/images/message.gif"
@@ -250,7 +250,7 @@ export default function HomePage() {
     </div>
 
     {/* Multiple PDFs → folder.gif */}
-    <div className="bg-white rounded-lg shadow border border-purple-600 p-6 text-center">
+    <div className="bg-white rounded-lg shadow-md border border-gray-600 p-6 text-center">
       <div className="flex justify-center mb-4">
         <Image
           src="/images/folder.gif"
@@ -265,7 +265,7 @@ export default function HomePage() {
     </div>
 
     {/* Rejection Workflow → rejection.gif */}
-    <div className="bg-white rounded-lg shadow border border-purple-600 p-6 text-center">
+    <div className="bg-white rounded-lg shadow-md border border-gray-600 p-6 text-center">
       <div className="flex justify-center mb-4">
         <Image
           src="/images/rejection.gif"
