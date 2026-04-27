@@ -6,6 +6,9 @@ const cors = require('cors');
 
 const app = express();
 app.use(cors()); // Allow requests from your Next.js app
+const ws = new WebSocket('wss://ticket-management-ern8.onrender.com/socket.io/?EIO=4&transport=websocket');
+ws.onopen = () => console.log('WebSocket open');
+ws.onerror = e => console.error(e);
 
 const server = http.createServer(app);
 const io = new Server(server, {
