@@ -66,7 +66,7 @@ export async function POST(request) {
     } catch (emailError) {
       warnings.push(`Email failed: ${emailError.message}`);
     }
-
+ 
     // Send WhatsApp using your API
     try {
       const whatsappMessage = `Hello ${name}, please upload your bank statement(s) using this secure link`;
@@ -74,8 +74,7 @@ export async function POST(request) {
       const whatsappResult = await sendWhatsAppMessage(
   phone,
   name,                
-  collectionLink,      
-  "Upload your bank statement securely" 
+  collectionLink,
 );
       if (whatsappResult.success) {
         await prisma.customer.update({
